@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FamilyHub — Arisan & Family Network</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="auth" class="login" style="display:none"></div>
+<div class="app" id="app" style="display:none">
+  <aside class="sidebar">
+    <div class="logo"><div class="logo-mark">FH</div><div><strong>FamilyHub</strong><small>Arisan & Family Network</small></div></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sidebar-bottom"><div class="mini-user"><div class="avatar" id="meAv"></div><div><b style="font-size:11px" id="meName"></b><small style="display:block;color:#858ca0;font-size:9px" id="meRole"></small></div></div><button class="lnk" style="margin-top:8px;color:#aeb5c7" onclick="pwForm()">Ganti password</button><button class="lnk" style="color:#aeb5c7" onclick="logout()">Keluar</button></div>
+  </aside>
+  <main class="main">
+    <div class="topbar"><div class="breadcrumb">FamilyHub / <b id="pageTitle"></b></div><div class="actions"><button class="icon-btn" onclick="theme()" aria-label="Ganti tema">◐</button></div></div>
+    <div id="view"></div>
+  </main>
+</div>
+<div class="modal" id="modal"><div class="modal-box" id="modalBox"></div></div>
+<div class="toast" id="toast"></div>
+<script src="/js/core.js"></script>
+<script src="/js/views.js"></script>
+<script src="/js/actions.js"></script>
+<script src="/js/main.js"></script>
+</body>
+</html>
