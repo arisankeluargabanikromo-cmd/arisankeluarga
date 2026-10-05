@@ -2,6 +2,7 @@
 /* ---------- auth ---------- */
 async function boot(){
   const a=await api('auth');
+  if(a.dbError)return authView('dberror');
   if(a.needSetup)return authView('setup');
   if(!a.user)return authView('login');
   const s=await api('summary');S.me=s.me;S.period=s.period;
@@ -13,8 +14,9 @@ async function boot(){
 }
 function authView(mode){
   const setup=mode==='setup';$('#app').style.display='none';const el=$('#auth');el.style.display='grid';
-  el.innerHTML=`<div class="card"><h2>${setup?'Pengaturan awal':'Masuk ke FamilyHub'}</h2><p>${setup?'Buat akun admin pertama. Kunci setup ada di Environment Variables Vercel (SETUP_KEY).':'Gunakan akun yang dibuat admin keluarga.'}</p>
-  ${setup?'<label>Kunci setup</label><input id="a_key" type="password"><label>Nama lengkap</label><input id="a_name">':''}
+  if(mode==='dberror'){el.innerHTML=`<div class="card"><h2>Database belum siap</h2><p>Aplikasi tidak dapat membaca database. Periksa dua hal di panduan: (1) <b>DATABASE_URL</b> di Vercel memakai Transaction pooler port 6543 dengan password yang benar, lalu Redeploy; (2) file <b>supabase/schema.sql</b> sudah dijalankan di SQL Editor Supabase.</p><button class="primary" style="width:100%" onclick="location.reload()">Coba lagi</button></div>`;return}
+  el.innerHTML=`<div class="card"><h2>${setup?'Pengaturan awal':'Masuk ke FamilyHub'}</h2><p>${setup?'Buat akun admin pertama. Untuk membuktikan Anda pemilik, masukkan <b>password database Supabase</b> yang Anda buat saat membuat project.':'Gunakan akun yang dibuat admin keluarga.'}</p>
+  ${setup?'<label>Password database Supabase</label><input id="a_key" type="password"><label>Nama lengkap</label><input id="a_name">':''}
   <label>Username</label><input id="a_user" autocomplete="username"><label>Password${setup?' (min. 8 karakter)':''}</label><input id="a_pw" type="password" autocomplete="current-password">
   <button class="primary" style="width:100%" id="a_btn">${setup?'Buat admin':'Masuk'}</button></div>`;
   const submit=async()=>{$('#a_btn').disabled=true;const b={action:mode,username:$('#a_user').value,password:$('#a_pw').value};
