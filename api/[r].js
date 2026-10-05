@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { sql } from '../lib/db.js';
-import { hash, verify, makeToken, readToken } from '../lib/auth.js';
+import { hash, verify, makeToken, readToken, setupKeyOk } from '../lib/auth.js';
 import { uploadPhoto, deletePhoto, storageReady } from '../lib/storage.js';
 
 const send = (res, d, c = 200) => res.status(c).json(d);
@@ -24,7 +24,7 @@ async function auth(req, res) {
     try {
       const admins = await sql`select 1 from members where role='admin' and pw_hash is not null limit 1`;
       if (!admins.length) return send(res, { needSetup: true });
-    } catch { return send(res, { needSetup: true }); }
+    } catch (e) { console.error(e); return send(res, { dbError: true }); } // koneksi gagal / tabel belum dibuat
     const id = readToken(req);
     const u = id && (await sql`select id,name,role from members where id=${id} and active`)[0];
     return send(res, { user: u || null });
@@ -36,7 +36,10 @@ async function auth(req, res) {
   }
   const setCookie = id => res.setHeader('Set-Cookie', `fh=${makeToken(id)}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=604800`);
   if (b.action === 'setup') {
-    if (!process.env.SETUP_KEY || b.key !== process.env.SETUP_KEY) return send(res, { error: 'Kunci setup salah' }, 403);
+    if (!setupKeyOk(b.key)) {
+      await new Promise(r => setTimeout(r, 600));
+      return send(res, { error: 'Password database salah' }, 403);
+    }
     if (!b.name || !b.username || (b.password || '').length < 8) return send(res, { error: 'Nama, username, dan password (min. 8 karakter) wajib diisi' }, 400);
     if ((await sql`select 1 from members where role='admin' limit 1`).length) return send(res, { error: 'Admin sudah ada' }, 409);
     const [u] = await sql`insert into members(name,relation,generation,role,username,pw_hash) values(${b.name},'Kepala keluarga',1,'admin',${b.username.toLowerCase()},${hash(b.password)}) returning id`;
